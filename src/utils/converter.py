@@ -51,29 +51,33 @@ def coco2bb(path, bb_type=BBType.GROUND_TRUTH):
                 'img_size': (int(i['width']), int(i['height']))
             }
         annotations = []
+        
         if 'annotations' in json_object:
             annotations = json_object['annotations']
-
+        
         for annotation in annotations:
-            img_id = annotation['image_id']
-            x1, y1, bb_width, bb_height = annotation['bbox']
-            if bb_type == BBType.DETECTED and 'score' not in annotation.keys():
-                print('Warning: Confidence not found in the JSON file!')
-                return ret
-            confidence = annotation['score'] if bb_type == BBType.DETECTED else None
-            # Make image name only the filename, without extension
-            img_name = images[img_id]['file_name']
-            img_name = general_utils.get_file_name_only(img_name)
-            # create BoundingBox object
-            bb = BoundingBox(image_name=img_name,
-                             class_id=classes[annotation['category_id']],
-                             coordinates=(x1, y1, bb_width, bb_height),
-                             type_coordinates=CoordinatesType.ABSOLUTE,
-                             img_size=images[img_id]['img_size'],
-                             confidence=confidence,
-                             bb_type=bb_type,
-                             format=BBFormat.XYWH)
-            ret.append(bb)
+            try:
+                img_id = annotation['image_id']
+                x1, y1, bb_width, bb_height = annotation['bbox']
+                if bb_type == BBType.DETECTED and 'score' not in annotation.keys():
+                    print('Warning: Confidence not found in the JSON file!')
+                    return ret
+                confidence = annotation['score'] if bb_type == BBType.DETECTED else None
+                # Make image name only the filename, without extension
+                img_name = images[img_id]['file_name']
+                img_name = general_utils.get_file_name_only(img_name)
+                # create BoundingBox object
+                bb = BoundingBox(image_name=img_name,
+                                class_id=classes[annotation['category_id']],
+                                coordinates=(x1, y1, bb_width, bb_height),
+                                type_coordinates=CoordinatesType.ABSOLUTE,
+                                img_size=images[img_id]['img_size'],
+                                confidence=confidence,
+                                bb_type=bb_type,
+                                format=BBFormat.XYWH)
+                ret.append(bb)
+            except TypeError:
+                print('None object')
     return ret
 
 
